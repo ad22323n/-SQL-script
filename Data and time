@@ -1,0 +1,25 @@
+A healing potion costs 50 gold coins. For each character with an account balance of at least 100, calculate how many healing potions it can buy (column name potion_amount) and how much money it will have left as a result of that purchase (column change). Round the first column down to integers.
+SELECT floor(account_balance/50) as potion_amount, mod(account_balance,50) as change
+FROM character 
+WHERE account_balance >= 100
+Each warrior (class = 'warrior') at level 3 or higher can perform a special attack whose damage is calculated as follows: its strength plus one fourth of its hp, and then multiplied by the absolute value of stat_modifier. Round this column to 2 decimal places.
+Show the name and special attack damage (column damage) calculated for those characters which have the attack available.
+SELECT name, round((strength + 1/4.0 * hp) * abs(stat_modifier), 2) AS damage
+FROM character
+WHERE class = 'warrior'
+    AND level > 2;
+For players with IDs equal to 1 and 5, show firstname and lastname together with the level, height rounded to two decimal places, and account_balance rounded down. The column names should be: firstname, lastname, level, height, and account_balance.
+SELECT p.firstname, p.lastname, c.level, round(cast(c.height as numeric),2) as height, floor(c.account_balance) as account_balance
+FROM player as p join character as c
+ON p.id = c.player_id
+WHERE p.id in (1, 5)
+For each aircraft produced in 2010, show its id, production date and the distinctive codes of routes they operate on (rename the column to route_code).
+SELECT distinct a.id, a.produced, f.route_code as route_code
+FROM aircraft as a join flight as f
+ON a.id = f.aircraft_id
+WHERE a.produced between '2010-01-31' and '2010-12-31'
+For all the aircraft launched in 2013 or 2014, show their id and launch date. Sort by the column launched from the newest to the oldest dates.
+SELECT id, launched
+FROM aircraft
+WHERE launched >= '2013-01-01' and launched <='2015-01-01'
+ORDER BY launched desc
