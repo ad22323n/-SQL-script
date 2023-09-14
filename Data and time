@@ -2,24 +2,79 @@ A healing potion costs 50 gold coins. For each character with an account balance
 SELECT floor(account_balance/50) as potion_amount, mod(account_balance,50) as change
 FROM character 
 WHERE account_balance >= 100
+
 Each warrior (class = 'warrior') at level 3 or higher can perform a special attack whose damage is calculated as follows: its strength plus one fourth of its hp, and then multiplied by the absolute value of stat_modifier. Round this column to 2 decimal places.
 Show the name and special attack damage (column damage) calculated for those characters which have the attack available.
 SELECT name, round((strength + 1/4.0 * hp) * abs(stat_modifier), 2) AS damage
 FROM character
 WHERE class = 'warrior'
     AND level > 2;
+
 For players with IDs equal to 1 and 5, show firstname and lastname together with the level, height rounded to two decimal places, and account_balance rounded down. The column names should be: firstname, lastname, level, height, and account_balance.
 SELECT p.firstname, p.lastname, c.level, round(cast(c.height as numeric),2) as height, floor(c.account_balance) as account_balance
 FROM player as p join character as c
 ON p.id = c.player_id
 WHERE p.id in (1, 5)
+
 For each aircraft produced in 2010, show its id, production date and the distinctive codes of routes they operate on (rename the column to route_code).
 SELECT distinct a.id, a.produced, f.route_code as route_code
 FROM aircraft as a join flight as f
 ON a.id = f.aircraft_id
 WHERE a.produced between '2010-01-31' and '2010-12-31'
+
 For all the aircraft launched in 2013 or 2014, show their id and launch date. Sort by the column launched from the newest to the oldest dates.
 SELECT id, launched
 FROM aircraft
 WHERE launched >= '2013-01-01' and launched <='2015-01-01'
 ORDER BY launched desc
+
+For all the aircraft launched in 2013 or 2014, show their id and launch date. Sort by the column launched from the newest to the oldest dates.
+SELECT id, launched
+FROM aircraft
+WHERE launched >= '2013-01-01' and launched <='2015-01-01'
+ORDER BY launched desc
+
+For each aircraft, show its id as aircraft_id and calculate the average distance (call it average) covered on all its routes. Only take into account those aircrafts which were launched before January 1, 2014 and took more than 1 flight
+SELECT aircraft.id AS aircraft_id, AVG(route.distance) as average
+FROM flight, aircraft, route 
+WHERE flight.aircraft_id = aircraft.id 
+AND flight.route_code = route.code 
+AND aircraft.launched < '2014-01-01' 
+GROUP BY aircraft.id 
+HAVING COUNT(flight.aircraft_id)>1;
+
+•	EXTRACT(field FROM Column) :  Here ‘field’ is DAY, MONTH, YEAR, DAY , MINUTE, HOUR, SECOND.
+Extract and show the month of each withdrawn date in the table aircraft (name the column month). Show the column withdrawn as the second column for reference.
+SELECT extract(month from withdrawn) as month, withdrawn
+FROM aircraft
+ORDER BY month desc
+
+For each route, show its code and the departure time in the following, changed format: hh.mm, where hh is the hour and mm the minutes. Name the second column time.
+SELECT code, EXTRACT(Hour from departure) || '.' || EXTRACT(Minute from departure) as time
+FROM route
+
+PerfectAir decided to use the withdrawn aircraft (id = 5). Show its id, its original withdrawn date and the withdrawn date postponed by 1 year and 6 months. Name the last column changed_date.
+SELECT id, withdrawn, withdrawn + INTERVAL '1-6' YEAR TO MONTH as changed_date
+FROM aircraft
+WHERE id = 5
+
+Before the official launch, every plane has a 14-day test period. However, some planes, due to complications with paperwork may be held for a few hours longer than usual, before they can officially take off.
+For plane with ID of 4, show the original launch timestamp and the timestamp of when its test period began (it lasted exactly 14 days, 8 hours, 41 minutes and 16 seconds). Name the second column test_date.
+SELECT launched, launched - INTERVAL '14 8:41:16' DAY TO SECOND as test_date
+FROM aircraft
+WHERE id = 4
+
+PerfectAir has changed its schedules. All flights which depart after 1:00 PM have been delayed by 1 hour. Show the code of each route together with the new departure (as new_departure) and arrival times (as new_arrival).
+SELECT code, departure + interval '1' HOUR as new_departure, arrival + interval '1' HOUR as new_arrival
+FROM route
+WHERE departure > '13:00'
+
+Find the id of all the aircraft which were produced earlier than 3 months ago.
+SELECT id
+FROM aircraft
+WHERE produced <  current_date - INTERVAL '3' MONTH
+
+Find the code of all the routes which normally depart within 3 hours from the current time.
+SELECT code
+FROM route
+WHERE departure between current_time and current_time + INTERVAL '3' Hour   
