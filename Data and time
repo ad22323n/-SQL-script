@@ -78,3 +78,18 @@ Find the code of all the routes which normally depart within 3 hours from the cu
 SELECT code
 FROM route
 WHERE departure between current_time and current_time + INTERVAL '3' Hour   
+
+For all the flights which took place on July 11, 2015, show the from_airport, to_airport, and the model of the aircraft.
+
+SELECT r.from_airport, r.to_airport, a.model
+FROM aircraft as a join flight as f
+ON f.aircraft_id = a.id
+JOIN route as r
+ON r.code = f.route_code
+WHERE f.date = '2015-07-11'
+
+Calculate the average delay time for all the flights which took place in August (any year).
+SELECT avg(delay)
+FROM flight
+WHERE extract(MONTH from date) = '8'
+
