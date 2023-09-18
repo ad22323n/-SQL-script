@@ -93,3 +93,21 @@ SELECT avg(delay)
 FROM flight
 WHERE extract(MONTH from date) = '8'
 
+For each route, show its code together with the number of flights on that route and the average delay on that route. Only take into account flights older than 6 months. Don't show the routes with zero flights on it or NULL average delay. The column names should be: code, count, and avg.
+SELECT r.code as code, count(f.id) as count, avg(f.delay) as avg
+FROM route as r join flight as f
+ON r.code = f.route_code
+WHERE f.date < current_date - INTERVAL '6' month
+GROUP BY code
+
+Group all the flights by the year. Show the year (as year) and calculate the average delay time for each of those years (as avg).
+SELECT EXTRACT(year from date) as Year, avg(delay) as avg
+FROM flight 
+GROUP by year
+
+Count the number of distinct aircraft which were used during flights in August 2015. Name the column aircraft_no.
+SELECT distinct count(aircraft_id) as aircraft_no
+FROM flight
+WHERE date between '2015-08-01' and '2015-0
+
+
