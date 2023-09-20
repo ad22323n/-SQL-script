@@ -110,4 +110,28 @@ SELECT distinct count(aircraft_id) as aircraft_no
 FROM flight
 WHERE date between '2015-08-01' and '2015-0
 
+Mr Amund released a certain series of products on April 30, 2014. Now, he would like to get all the names, categories and types of those products which were introduced any time later or which will be introduced in the future (i.e., they don't have a launch_date yet). Write the proper query.
+SELECT name, category, type
+FROM product
+WHERE launch_date >= '2014-03-30' or launch_date is null
+
+Select all the columns for products from categories: kitchen, bathroom, or with unknown category.
+SELECT *
+FROM product
+WHERE category in ('kitchen', 'bathroom') or category is null
+
+Check it out for yourself. For all products, show their category, type and the following text: category and type separated with a colon (:), for example:
+kitchen:fork
+Name the last column category_type. Note what happens with the row which doesn't have a category.
+SELECT category, type, category || ':' || type as category_type
+FROM product
+
+A new tax has been imposed on all the products, which is 2% of the final price. Show all product names with their old price (column name old_price) and new price rounded to two decimal points (column name new_price). Note what happens when there is no price.
+SELECT name, price as old_price, price + round(price * 0.02,2)  as new_price
+FROM product
+
+Mr Amund wants to pick products with short names for his new advertisement. Show the names of all products shorter than 8 characters or those which have a NULL name. Show the description as the second column so that Mr Amund can think of a (short) name if it's missing for a certain product before the advertisement is published.
+SELECT name, description
+FROM product
+WHERE length(name) <8 or name is null
 
