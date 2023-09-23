@@ -1,0 +1,276 @@
+For every auctioned item that was sold for a price greater than its initial price, show the item name together with the name of its buyer and the price they paid:
+SELECT auction_item.name,  bidder.name, bidder.final_price
+FROM auction_item inner Join bidder
+ON auction_item.id = bidder.bought_item_id
+WHERE auction_item.initial_price < bidder.final_price
+
+Show the name, initial price, and final price of every item with initial price greater than $300. If the item wasn't sold (there was no bidding person), show the item's name anyway.
+SELECT auction_item.name, auction_item.initial_price, bidder.final_price
+FROM auction_item left join bidder
+ON auction_item.id = bidder.bought_item_id
+WHERE auction_item.initial_price > 300
+
+Show all information only for those items that weren't auctioned off
+SELECT *
+FROM auction_item left join bidder
+ON auction_item.id = bidder.bought_item_id
+where bidder.bought_item_id IS NULL
+
+List all products that have fewer than 150 calories.
+For each product show its name (rename the column to product) and the department in which it can be found (name the column department).
+SELECT product.name as product, department.name as department
+FROM product JOIN department 
+ON product.department_id = department.id 
+JOIN nutrition_data 
+ON nutrition_data.product_id = product.id
+WHERE nutrition_data.calories < 150
+
+For each fruit (found in the fruits department) show the product's shelf id, name, price, and number of calories.
+SELECT product.shelf_id, product.name, product.price, nutrition_data.calories
+FROM product JOIN nutrition_data
+ON product.id = nutrition_data.product_id
+WHERE product.department_id = 1
+
+Let's make use of our new table straight away. For each product show its name, price, department name, and producer name.
+Alias the columns as product_name, product_price, department_name, and producer_name, respectively
+SELECT product.name as product_name, product.price as product_price, 
+		department.name as department_name, producer.name as producer_name
+FROM product join department
+	ON product.department_id = department.id 
+    JOIN producer 
+    ON producer.id = product.producer_id
+
+For each product display:the name of the company that produced it (alias the column to producer_name),the name of the department where the product is located (alias it to department_name),
+the name of the product (alias it to product_name),the total number of carbohydrates in the product.Your query should still consider products with no information about producer_id or department_id.
+SELECT
+prod.name AS producer_name,d.name AS department_name,p.name AS product_name,nd.carbohydrate
+FROM product p LEFT JOIN producer prod ON prod.id=p.producer_id
+LEFT JOIN department d ON d.id=p.department_id
+LEFT JOIN nutrition_data nd ON nd.product_id=p.id
+
+For every day in the sales_history table show the sales of the products with ID's 13, 18, and 15.Display the date, name, amount, and calorific value of a product. Order the results by date and then by calorific value.
+SELECT product.name, sales_history.date, sales_history.amount, nutrition_data.calories
+FROM product join sales_history 
+on product.id = sales_history.product_id
+join nutrition_data
+ON sales_history.product_id = nutrition_data.product_id
+where sales_history.product_id in ('13', '18', '15')
+order by sales_history.date, nutrition_data.calories
+
+For products that weren't sold even once between 2015-02-01 and 2015-02-05, show the product name (rename the column to product_name), it's price and the producer's name (rename the column to company_name). You should display all products that haven't been sold in this interval, also the ones that don't belong to any company.
+SELECT product.name as product_name, product.price, producer.name as company_name
+FROM product left join sales_history
+ON sales_history.product_id = product.id and sales_history.date  between '2015-02-01' and '2015-02-05' 
+left join producer
+ON producer.id = product.producer_id
+WHERE sales_history.product_id is Null;
+
+Show the name and price of each product in the 'fruits' and 'vegetables' departments. Consider only those products that are not produced by 'GoodFoods'
+SELECT  p.name, p.price
+FROM product p
+LEFT JOIN producer prod
+  ON p.producer_id = prod.id
+JOIN department d
+  ON d.id = p.department_id
+WHERE d.name IN ('fruits', 'vegetables')
+AND (prod.name != 'GoodFoods' OR prod.id IS NULL);
+
+Show only worker's name, and specialization. Alias column with the name as apprentice. Consider only those workers whose supervisors have more than 14 years of experience.
+SELECT w.name as apprentice, w.specialization
+FROM workshop_workers as w  join workshop_workers as s
+ON w.master_id = s.id
+WHERE  s.experience > 14
+
+Show the name of the apprentice, their specialization and the ID of the project if the project they are working on is not directly supervised by their master, i.e. the master currently works on another project
+SELECT w.name, w.specialization, w.project_id
+FROM workshop_workers as w join workshop_workers as s
+ON w.master_id = s.id
+where w.project_id != s.project_id;  (We are considering project_Id of worker that is different from project_id of master)
+
+Show each dictionary entry (name the column entry) together with the name of its direct hypernym (name the column hypernym) and the name of that hypernym's hypernym (name the column grandhypernym).
+Only include words that have both a direct hypernym and a "grandhypernym".
+SELECT entry.word as entry, hypernym.word as hypernym, grandhypernym.word as grandhypernym
+FROM dictionary as entry join dictionary as hypernym
+ON entry.hypernym_id = hypernym.entry_id
+JOIN dictionary as grandhypernym 
+ON grandhypernym.entry_id = hypernym.hypernym_id
+
+For each entry in the dictionary show the word, its direct hypernym and its hypernym's hypernym. Name the columns entry, hypernym and grandhypernym,respectively. Show all such entries, even those that don't have direct hypernyms or grandhypernyms.
+SELECT entry.word as entry, hypernym.word as hypernym, grandhypernym.word as grandhypernym
+FROM dictionary as entry left join dictionary as hypernym
+ON entry.hypernym_id = hypernym.entry_id
+left join dictionary as grandhypernym
+ON grandhypernym.entry_id = hypernym.hypernym_id
+
+List all pairs of full siblings. Full siblings are people who have the same mother and the same father. Name the columns with sibling names younger_sibling and older_sibling (use column year_born to identify who is younger).
+You can assume that in our database no two siblings were born in the same year and there are no more than two siblings per family.
+SELECT  young.name as younger_sibling, older.name as older_sibling
+FROM person as older join person as young
+ON young.mother_id = older.mother_id 
+and young.father_id = older.father_id
+WHERE young.year_born > older.year_born
+
+We want to know if there are any patients and physicians who have the same email in our clinic. Perhaps physicians also attend our clinic or former patients were hired by the clinic? List the first and last name of each patient (name the columns patient_first_name and patient_last_name) and the first and last name of each physician (name the columns physician_first_name and physician_last_name) for patients and physicians who share the same email address.
+SELECT patient.first_name as patient_first_name, patient.last_name as patient_last_name, 
+	physician.first_name as physician_first_name, physician.last_name as physician_last_name
+FROM patient join physician
+ON patient.email = physician.email
+
+For each patient and physician matching this condition, show the patient's ID (name the column patient_id), the ID of a physician (name the column physician_id), their shared first and last name, and the physician's years of experience. Only list physicians who have more than five years of experience.
+SELECT patient.id as patient_id, physician.id as physician_id, patient.first_name, physician.last_name, physician.experience
+FROM patient join physician
+ON patient.email = physician.email
+WHERE physician.experience > 5
+
+For each patient, list the treatment that they have been recommended. Select the ID and first and last name of each patient. Additionally, show the type of treatment that the patient has been recommended (name it type) along with a list 
+of the names of available treatment sessions. Only list treatments that are cheaper than $100.
+SELECT patient.id , patient.first_name, patient.last_name, 
+	   treatment.name, therapy.treatment_type as type
+FROM patient left join therapy
+ON patient.id = therapy.patient_id
+JOIN treatment
+ON treatment.type = therapy.treatment_type
+WHERE treatment.price < 100
+
+Show the names and types of treatments (name this column type) that were recommended by a physician named James Ferris. Additionally, show the IDs of patients (as patient_id) for whom these recommendations were made. Exclude treatments of the type relaxation
+SELECT name, type, patient_id
+FROM therapy JOIN treatment
+  ON treatment.type = treatment_type
+JOIN physician ON physician_id = physician.id
+WHERE type != 'relaxation'
+  AND physician.first_name = 'James'
+  AND physician.last_name = 'Ferris';
+
+Show the name of every buyer together with the name of every item that they can afford.
+SELECT buyer.name, item.name
+FROM item JOIN buyer
+ON item.price <= buyer.funds
+
+For every buyer that has funds greater than 10 000, show the name of the buyer and the names of the items they can afford that are not of the 'painting' type.
+SELECT buyer.name, item.name
+FROM item join buyer
+on item.price  <= buyer.funds
+where item.type != 'painting' and buyer.funds > 10000
+
+For every couple that wants an apartment, show their name together with the IDs of all apartments within their price range.
+SELECT couples.couple_name, apartments.id
+FROM couples join apartments
+ON apartments.price between couples.min_price and couples.max_price
+
+For each couple that wants an apartment, show their name with matching apartment IDs and locations for all apartments that are within their price range and in their preferred location
+SELECT couples.couple_name,apartments.id, apartments.location
+FROM couples join apartments
+ON apartments.price between couples.min_price and max_price 
+and apartments.location = couples.pref_location
+
+For each order placed during the promotional period, show its ID, the ID of the ordered product, the date when the order was placed, and the total amount that was paid for the order (amount * price). Name the column total_amount
+SELECT o.ID, o.product_id, o.order_date, o.amount * p.price as total_amount
+FROM orders as o join product_price as p
+ON o.product_id = p.product_id
+and o.order_date between start_date and end_date
+
+Show the name of each treatment and the first and last names of the patients to whom it was recommended for all therapies recommended by physicians with the surname Core or Calderwood.Consider only patients with odd ID numbers
+SELECT treatment.name, patient.first_name, patient.last_name
+FROM patient join therapy
+ON patient.id = therapy.patient_id
+JOIN treatment 
+ON treatment.type = therapy.treatment_type
+Join physician
+ON physician.id = therapy.physician_id
+WHERE (physician.last_name = 'Core' or physician.last_name = 'Calderwood')
+and patient.id % 2 = 1
+
+Show the name of each couple, their preferred apartment location, and the apartment ID for all apartments that are neither in their price range nor in their preferred location.
+SELECT couples.couple_name, couples.pref_location, apartments.id
+FROM apartments join couples
+ON apartments.price not between couples.min_price and couples.max_price
+and (couples.pref_location != apartments.location)
+
+For each buyer with funds less than 8000, show their name together with the names of all paintings and sculptures that are outside of their price range
+SELECT buyer.name, item.name
+FROM buyer join item
+ON buyer.funds < item.price
+WHERE item.type in ('painting', 'sculpture') and buyer.funds < 8000
+
+Show the name of each lecturer together with the ID of the group they teach, the language they teach, and the level of the group they teach.
+SELECT lecturer.name, student_group.id, lecturer.language, student_group.group_level
+FROM lecturer join student_group
+on lecturer.id = student_group.lecturer_id
+
+Show each group ID, number of members, level, language and tuition cost. Consider only groups with more than 10 people and whose lecturer is not 'Maria Garcia'.
+SELECT student_group.id, student_group.person_no, student_group.group_level,  lecturer.language, tuition.cost
+FROM student_group join tuition
+ON tuition.group_id = student_group.id 
+JOIN lecturer
+ON lecturer.id = student_group.lecturer_id
+WHERE student_group.person_no > 10 and lecturer.name != 'Maria Garcia'
+
+Show each student group's ID (use the group_id column), room ID, lecture day, and lecture hour for those groups that do not have both lectures in the same room
+SELECT t1.group_id, t1.room_id, t1.day, t1.hour
+FROM timetable t1 inner join timetable t2
+ON t1.room_id <> t2.room_id
+and t1.group_id = t2.group_id
+
+For each group, show its ID (as group_id), language, and level, together with the ID of the room they're in and the days when they have lectures. Consider only those groups whose lectures are always held in the same room.
+SELECT student_group.id as group_id, student_group.language, student_group.group_level, timetable.room_id,timetable.day
+FROM student_group join timetable
+ON student_group.id = timetable.group_id
+JOIN timetable as t2
+ON student_group.id = t2.group_id
+and timetable.room_id = t2.room_id
+and timetable.day <> t2.day
+
+For all groups taught in the La Lingua school, show the following information:the ID of a given group, the name of the lecturer who teaches that group,the language that the group learns, the level of the group, and the days and hours when the group has lectures. However, show this information only for 
+those groups that have both their lectures at the same hour and whose tuition is greater than 800 dollars
+SELECT student_group.id, lecturer.name, student_group.language, student_group.group_level, tt.day, tt.hour
+FROM student_group JOIN lecturer ON lecturer_id = lecturer.id
+JOIN timetable tt ON tt.group_id = student_group.id
+JOIN timetable tt2  ON tt.group_id = tt2.group_id
+JOIN tuition ON tuition.group_id = student_group.id
+WHERE tt.day != tt2.day AND tt.hour = tt2.hour
+  AND tuition.cost > 800
+
+Show model, brand, mileage and production year from the car table for these cars that were produced after the 'Roadmaster' (id = 2) and whose original price is greater than original_price of 'Speedster' (id = 1)
+SELECT model, brand, mileage, prod_year
+FROM car
+WHERE id > 2 and original_price > 80000;
+	OR
+SELECT c1.model, c1.brand, c1.mileage, c1.prod_year
+FROM car as c1 INNER JOIN car as c2
+ON c1.prod_year > c2.prod_year
+AND c1.original_price > c2.original_price
+WHERE c2.model = 'Roadmaster'
+AND c1.model != 'Speedster';
+
+Show the model, brand, and final price of each car sold at the auction. Consider only those sold cars that have more mileage than the car with id = 4
+SELECT model, brand, charity_auction.final_price
+FROM car inner join charity_auction
+ON car.id = charity_auction.car_id 
+and charity_auction.final_price is not null
+where mileage > (Select mileage
+       FROM car 
+       where id = 4)
+
+Show the model and brand of each car whose initial_price was in the price range of the buyer with id = 3, but whose final_price was outside the buyer's price range.
+Show me the answer
+SELECT model, brand
+FROM car join charity_auction
+ON car.id = charity_auction.car_id
+JOIN buyer
+ON buyer.id = charity_auction.buyer_id
+where buyer.id = 3
+and charity_auction.initial_price <= buyer.funds
+
+Show each buyer's ID (rename the column to buyer_id) together with the model and mileage of the car they bought.
+If a potential buyer didn't buy any car, show their ID anyway.
+SELECT b.id as buyer_id , model, mileage
+FROM buyer as b left join charity_auction as c
+on b.id = c.buyer_id
+left join car
+on car.id = c.car_id
+
+Show the ID and funds of each buyer who didn't buy anything at the auction.
+SELECT id, funds
+from buyer left join charity_auction as c
+on buyer.id = c.buyer_id
+where c.final_price is null
