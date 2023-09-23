@@ -1,0 +1,255 @@
+Show all information about all cities which have the same area as Paris
+SELECT *
+FROM city
+WHERE area = (SELECT area
+            FROM city
+            WHERE name = 'Paris')
+
+Find the names of all cities which have a population lower than Madrid.
+SELECT name
+FROM city
+WHERE population < (SELECT population
+                     FROM city
+                     WHERE name = 'Madrid')
+
+Find all information about trips whose price is higher than the average
+SELECT *
+FROM Trip
+WHERE price > (SELECT avg(price)
+               FROM Trip)
+
+Find all information about all trips in cities whose area is greater than 100
+SELECT *
+FROM trip
+WHERE city_id in (SELECT id
+              FROM city
+              WHERE area > 100)
+
+Find all information about the cities which are less populated than all countries in the database
+•	> ALL means "greater than every other value from the parentheses".
+SELECT *
+FROM city
+WHERE population < ALL (
+  SELECT population
+  FROM country)
+
+Find all information about all the city trips which have the same price as any hiking trip
+SELECT *
+FROM trip
+WHERE price = Any (
+  SELECT price
+  FROM hiking_trip)
+
+Find all information about cities with a rating higher than the average rating for all cities in that specific country.
+SELECT *
+FROM city as c1
+WHERE rating > (
+  SELECT avg(rating)
+  FROM city as c2
+  where c1.country_id = c2.country_id)
+
+Show all information about all trips to cities which have a rating lower than 4.
+SELECT *
+FROM TRIP
+WHERE city_id in (
+  SELECT id
+  FROM city
+  WHERE rating < 4)
+
+•	The operator EXISTS /NOT EXISTS is a new operator that checks if there are any rows that meet the condition: 
+Select all countries where there is at least one mountain
+SELECT *
+FROM country
+WHERE EXISTS (
+  SELECT *
+  FROM MOUNTAIN
+  WHERE mountain.country_id = country.id)
+
+Select all mountains with no hiking trips to them.
+SELECT *
+FROM mountain
+WHERE NOT EXISTS (
+  SELECT *
+  FROM hiking_trip
+  where mountain.id = hiking_trip.mountain_id)
+
+Select the hiking trip with the longest distance (column length) for every mountain.
+SELECT *
+FROM hiking_trip hk
+WHERE length >= ALL (
+  SELECT length
+  FROM hiking_trip ht
+  WHERE hk.mountain_id = ht.mountain_id)
+
+Select those trips which last shorter than any hiking_trip with the same price
+SELECT *
+FROM TRIP
+WHERE days < ANY (
+  SELECT days
+  FROM hiking_trip
+  WHERE trip.price = hiking_trip.price)
+
+Show mountains together with their countries. The countries must have at least 50,000 residents.
+SELECT m.name, c.name, c.population
+FROM mountain m join country c
+WHERE m.country_id = c.id and c.population >= 50000
+OR:
+SELECT *
+FROM mountain, (SELECT *
+                FROM country
+                WHERE population >= 50000) as country
+WHERE mountain.country_id = country.id
+
+Show hiking trips together with their mountains. The mountains must be at least 3,000 high. Select only the columns length and height
+SELECT length, height
+FROM hiking_trip, (SELECT *
+                   FROM mountain
+                   WHERE height >= 3000) as mountain
+WHERE hiking_trip.mountain_id = mountain.id
+
+•	Subquery can also be used withing the col list in a SELECT clause, it is important that the subquery returns exactly one row and column:
+Show each mountain name together with the number of hiking trips to that mountain (name the column count)
+SELECT name, (SELECT count(*)
+              FROM hiking_trip
+              WHERE mountain.id = hiking_trip.mountain_id) as count
+FROM mountain
+
+Show all the medals for the period between 2010 and 2014 for skating and cycling. Use the UNION keyword
+SELECT *
+FROM skating
+WHERE year between 2010 and 2014
+UNION
+SELECT *
+FROM cycling
+WHERE year between 2010 and 2014
+
+•	UNION returns result from 1st and 2nd query and removes duplicate while UNION ALL does the same but keeps the duplicate rows
+•	INTERSECT shows the rows that belong to BOTH tables
+
+Find names of each person who has medals both in cycling and in skating
+SELECT person
+FROM cycling
+INTERSECT
+SELECT person
+FROM skating
+
+•	EXCEPT : shows all the results from first (left) table with the exception of those that also appeared in the second(right) table(it returns the rows from the first table MINUS the rows from the second table).
+
+Find all the countries which have a medal in cycling but not in skating :
+The below query will see all country who have medal in cycling MINUS all country who medal in skating
+SELECT country
+FROM cycling
+EXCEPT
+SELECT country
+FROM skating
+
+Find all the years when there was at least one medal in skating but no medals in cycling. Use the keyword MINUS
+SELECT year
+FROM skating
+MINUS
+SELECT year
+FROM cycling
+
+Select all columns from horoscopes for Pisces and Aquarius from the years 2010 to 2014.
+SELECT *
+FROM horoscope
+WHERE sign in ('Aquarius' , 'Pisces') and year between 2010 and 2014
+
+Show all pets (show the columns name, type, year_born) whose name begins with an 'M' together with their owners (the columns name, year_born).
+Rename the column year_born from the table pet as pet_year_born and the column year_born from the table owner as owner_year_born
+SELECT p.name, p.type, p.year_born as pet_year_born, O.name, O.year_born as owner_year_born
+FROM pet as p  join OWNER as O
+ON p.owner_id = O.id
+where p.name LIKE 'M%'
+
+Show students' names (column person) together with the number of essays they handed in (name the column number_of_essays). their average number of points (name the column avg_points). Show only those students whose average number of points is more than 80
+SELECT person, count(*) as number_of_essays, avg(points) as avg_points
+FROM essay 
+group by person
+having avg(points)> 80
+
+Show all coaches together with the players they train, show all columns for coaches and players. Show unemployed coaches with NULLs instead of player data.
+SELECT *
+FROM coach left join player
+on player.id = coach.player_id
+
+Show all columns for the prisons where there is at least one prisoner above 50 years of age.
+SELECT *
+FROM prison 
+WHERE id in (SELECT prison_id
+                    FROM prisoner
+                    WHERE age >50)
+
+Show all columns for the products which are gluten free and vegetarian at the same time
+SELECT *
+FROM gluten_free_product
+INTERSECT
+SELECT *
+FROM VEGETARIAN_PRODUCT
+
+The owner of the shop would like to see each customer's id (name the column cus_id). name (name the column cus_name). id of their latest purchase (name the column latest_purchase_id).the total quantity of all flowers purchased by the customer, in all purchases, not just the last purchase (name the column all_items_purchased). Remember, you need not use all columns from all the tables here – choose them carefully.
+SELECT  c.id as cus_id, c.name as cus_name, max(p.id) as latest_purchase_id,sum(pu.quantity) as all_items_purchased
+FROM customer as c  join purchase as p
+ON c.id = p.customer_id
+ join purchase_item as pu
+ON p.id = pu.purchase_id
+group by c.id 
+
+------------------------------PRACTICE AGAIN:
+For each painting created in 1800 or later, show its title and the year it was painted (column painted). Include paintings for which the creation date is unknown
+SELECT title, painted
+FROM painting
+WHERE painted >=1800 or (painted is null)
+
+For each painting, show its title plus the first and last name of the painter. Only show the results for Dutch and Flemish painters.
+SELECT p.title, a.first_name, a.last_name
+FROM artist as a join painting as p
+ON a.id = p.artist_id
+WHERE a.nationality in('Dutch' , 'Flemish')
+
+Show the number of paintings whose date of creation is known and which were created in 1800 or later. Name the column paintings_no
+SELECT count(id) as paintings_no
+FROM painting
+WHERE painted >=1800 and (painted is not null)
+
+For each painter, show their first and last name together with the number of paintings they have painted. The names of the columns should be: first_name, last_name, and paintings_no
+SELECT a.first_name, a.last_name, count(p.id) as paintings_no
+FROM artist as a join painting as p
+ON a.id = p.artist_id
+group by a.first_name, a.last_name
+
+For each artist, show their first and last name, the average, minimum and maximum ratings from all their paintings. Only show those artists who have more than 2 paintings
+SELECT a.first_name, a.last_name, avg(p.rating) as avg_rating, min(p.rating) as min_rating, max(p.rating) as max_rating
+FROM artist as a join painting as p
+on a.id = p.artist_id
+group by a.first_name, a.last_name
+having count(p.id)>2
+
+For each item, show the following sentence: 'ID X is Y.', where X is the id of the item and Y is its name. Name the column sentence
+SELECT 'ID ' || id || ' is ' || name || '.' as sentence
+FROM item
+OR 
+SELECT concat('ID ', id ,' is ', name, '.') as sentence
+FROM item
+
+Show the IDs of all the items with a name longer than 8 characters. Show the length as the second column, name it name_length
+SELECT ID, length(name) as name_length
+FROM item
+where length(name) >8
+
+For each slogan, show the item name and the slogan with all the periods (.) replaced by exclamation marks (!). Name the second column changed_text.
+SELECT i.name, replace(s.text, '.','!') as changed_text
+FROM slogan as s join item as i
+ON i.id = s.item_id
+
+For each slogan with a text longer than 20 characters, show the text fragment from character 5 until character 20. Name the column text_substring
+SELECT substring(text, 5,16) as text_substring
+FROM slogan
+WHERE length(text) > 20
+
+For each 'tv commercial' slogan, show the item name, the item type, and the text with each period (.) turned into three exclamation marks (!!!) – name this column changed_text.
+SELECT i.name, i.type, replace(s.text, '.','!!!') as changed_text
+FROM item as i join slogan as s
+ON i.id = s.item_id
+WHERE s.type = 'tv commercial'
+
