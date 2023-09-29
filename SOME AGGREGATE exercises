@@ -12,3 +12,19 @@ Count the number of project with non-zero feedback. Name the column projects_no
 SELECT count(feedback) as projects_no
 FROM project
 WHERE feedback != 0
+
+Show clients IDs (client_id) together with the number of projects they have commissioned. Name the second column projects_no. Don't show clients without any project.
+SELECT client_id, count(project_id) as projects_no
+FROM project
+group by client_id
+
+Let's check the statistics the other way round. For each translator in table project, show their ID (as translator_id) and the number of clients they have worked for. Name the second column clients_no.
+SELECT translator_id,count(distinct client_id) as clients_no
+FROM project
+GROUP BY translator_id
+
+The rate per word is the price divided by the number of words. For every translator, show ID together with number of distinct rates per word they used in their projects. Name the second column rates_no.
+SELECT  translator_id, count(distinct cast(price as numeric)/words)
+as rates_no
+FROM project
+Group by translator_id
