@@ -59,3 +59,57 @@ SELECT translator_id, avg(words) as average
 FROM project
 WHERE project_id != 6
 GROUP BY translator_id
+
+For each translator, show their first and last name together with the average price of all the projects they have completed (as rounded_average). Round the price to two decimal places. Count only the projects with the number of words greater than 500. Exclude translators who have completed fewer than 2 projects (all completed projects are present in the project table).
+SELECT  t.first_name, t.last_name, round(avg( p.price),2) as rounded_average
+FROM  translator as t left join project as p 
+ON p.translator_id = t.translator_id
+WHERE p.words > 500 
+group by first_name, last_name
+HAVING count(p.project_id) >2
+
+Remember the translator with translator_id = 5 Adriana Fuentes? Let's go back there again. Sum all the words from all her projects except for project_id = 13 so that you only sum NULLs. Name the column sum
+SELECT sum(words) as sum
+FROM project
+WHERE project_id != 13 and translator_id = 5
+Show translator ids with the sum of the prices of all the projects they have completed (as sum). Exclude project_id = 13 so that one of the translators has NULL prices only. Instead of that NULL sum, show 0.
+SELECT translator_id, COALESCE(sum(price),0) as sum
+FROM project
+WHERE project_id != 13
+GROUP by translator_id
+
+For each translator, show their first and last name, followed by:
+the sum of the prices for all the projects they have completed (as sum).
+the maximum price (as max).the minimum price (as min).Make sure that all translators are shown, and if any of these values turns out to be NULL, show 0 instead
+SELECT t.first_name, t.last_name, COALESCE(sum(p.price),0) as sum, COALESCE(max(p.price),0) as max, COALESCE(min(p.price),0) as min      
+FROM translator as t left join project as p
+ON t.translator_id = p.translator_id
+GROUP BY 1,2
+
+Count the number of all projects, the number of clients that have commissioned at least one project (that is, count them once even if they commissioned more than one project) and the average price for all the projects. Name the columns: projects_no, clients_no, and average_price.
+SELECT count(DISTINCT project_id) as projects_no, count(DISTINCT client_id) as clients_no, avg( price) average_price
+FROM project
+
+For each translator, show:
+•	their first and last name.
+•	the number of projects they have completed (as projects_no).
+•	the highest number of words among their projects (as max_words).
+•	the average price among their projects rounded to integer values (as rounded_avg_price)
+SELECT t.first_name, t.last_name, count(p.project_id) as projects_no, 
+		max(p.words) as max_words, round(avg(p.price)) as rounded_avg_price
+FROM translator as t left join project as p
+ON t.translator_id = p.translator_id
+GROUP BY 1,2
+
+For each language combination in table project (e.g. EN to ES, ES to EN, DE to PL etc.) show lang_from, lang_to and the average price in this combination (as avg_price). When calculating the average, treat NULL values as 0.
+SELECT lang_from, lang_to, avg(COALESCE(price, 0)) as avg_price
+FROM project
+GROUP BY 1,2
+
+Show each client's name together with the number of projects they have completed (name this column projects_no). Show only those clients who have commissioned more than 1 project.
+SELECT c.name, count(p.project_id) as projects_no
+FROM client as c left join project as p
+ON c.client_id = p.client_id
+GROUP BY 1
+HAVING count(project_id) >1
+
