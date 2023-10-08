@@ -1,0 +1,38 @@
+Task 1
+Evelyn is preparing for a new exhibition. She has noticed she is missing biographies for some artists. She would like to contact them and ask them to provide her with a short biography for use in her gallery. Will you find out which artists have missing biographies?Display the names and the emails of the artists whose biographies are missing. Sort the rows alphabetically by the artist's name.
+SELECT name, email
+FROM artist
+WHERE biography is null
+ORDER BY name asc
+
+Task 2
+Well done! Now, Evelyn would like to generate new captions for all the art pieces in the gallery. Will you help her with this task
+Display a list of all art pieces. The result should contain the artwork ID and one additional column called caption. The caption should look like this: 'Artist: < the artist's name >, title: < the title of the art piece >'. If the artist is not found, display 'unknown' instead of the artist's name. Sort the results by the artwork ID in ascending order.
+SELECT art.id, concat('Artist: ', COALESCE(a.name,'unknown'), ', ','title: ', art.title) as caption
+FROM artwork as art left join artist as a
+ON a.id = art.artist_id
+ORDER BY art.id asc
+
+Task 3
+Evelyn would like to see a list of the exhibitions that took place from May to July 2023. Are you able to find this information in the database?
+Retrieve the title, the start date, the end date, and the description for each exhibition that took place from May to July 2023 (that is, those that started on or after May 1, 2023, and ended on or before July 31, 2023). Sort the results alphabetically by the exhibition title.
+SELECT title, start_date, end_date, description
+FROM exhibition
+WHERE start_date between '2023-01-01' and '2023-07-01'
+ORDER BY title asc
+
+Task 4
+Excellent! Now, Evelyn is wondering what the average length of the artist biographies is. Let's find it in the database!
+Show the average length of the biographies of the artists. Name this column average_bio_length. Round the result down to the nearest integer.
+Keep in mind that some biographies are missing. So, when calculating the average, make sure to handle NULL values correctly. That is, treat a NULL value as if it were a biography with a length of 0 characters.
+SELECT floor(avg(length(COALESCE(biography, '')))) as average_bio_length
+FROM artist
+
+Task 5
+Next, Evelyn would like to know which art pieces have not yet been shown in an exhibition. Do you know how to find this information in the database?
+Display the title, the description, and the medium used for each art piece that has not been a part of any exhibition.
+SELECT artwork.title, artwork.description, artwork.medium
+FROM artwork
+LEFT JOIN exhibition_artwork 
+  ON artwork.id = exhibition_artwork.artwork_id
+WHERE exhibition_artwork.exhibition_id IS NULL;
