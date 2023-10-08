@@ -36,3 +36,33 @@ FROM artwork
 LEFT JOIN exhibition_artwork 
   ON artwork.id = exhibition_artwork.artwork_id
 WHERE exhibition_artwork.exhibition_id IS NULL;
+
+Task 6
+You nailed it! Now, Evelyn has asked you to retrieve the list of all artists with the first 100 characters of their respective biographies. Will you generate such a list? Display the artist's name, birth date, nationality, and the first 100 characters of his/her biography followed by three dots (...) if the biography is longer than 100 characters (name this column truncated_biography). If the biography has 100 or fewer characters, display the entire biography in the same column.
+SELECT artist.name, artist.birth_date, artist.nationality, 
+	CASE WHEN length(biography) <= 100 THEN biography
+    ELSE substring(biography, 1, 100) || '...'
+    END as truncated_biography
+FROM artist
+
+Task 7
+Evelyn is planning to send some art pieces from her collection to an exhibition in a museum located in another city. She would like to see the cost to transport each art piece. Will you find this out using your SQL skills?Display the title of the art piece (name the column artwork_title), its dimensions (name the column dimensions; it should consist of the width and height values separated by an 'x' character, for example, '10x10'), and the cost to transport the art piece (name this column transport_cost).The transport cost should be calculated based on the width and height of the piece. If both width and height are less than or equal to 50 cm, then calculate the cost using the formula: (width + height) * 1.75. If the width and/or height is greater than 50cm, but both width and height are less than or equal to 100 cm, then calculate the cost using the formula: (width + height) * 3.75. Art pieces whose width and/or height is greater than 100cm have a flat rate of 1500 dollars each. Round the cost up to the nearest integer. Sort the results by the transportation cost from the highest to the lowest.
+SELECT title as artwork_title, width ||  'x'  || height as dimensions,
+	CASE 
+        WHEN width <=50 and height <=50 THEN CEIL((width+height) * 1.75)
+        WHEN width <=100 and height <=100 THEN CEIL((width + height) * 3.75)
+    	ELSE 1500
+    END as transport_cost      
+FROM artwork
+ORDER BY transport_cost DESC
+
+Task 8
+Evelyn would like to prepare a list of all artists, showing for each artist the number of art pieces sold, the average price per piece, and the total amount of money made from selling the art pieces. Will you help her with this?For each artist, display the artist ID, the artist name, the number of art pieces sold (name this column sold_artwork_count), the average price of the art pieces sold (name this column average_price and round it to 2 decimal places), and the total amount of money made from selling the artwork (name this column total_earnings). Be sure to handle the scenario in which an artist may not have yet sold any art pieces (resulting in NULL values). If an artist has not yet sold any artwork, display 0 as total_earnings. Sort the results by the total earnings from the highest to the lowest and then by the artist name
+SELECT artist.id, artist.name, count(sale.artwork_id) as sold_artwork_count, 
+	   round(avg(COALESCE(sale.price,0)),2) as average_price, COALESCE(sum(sale.price),0) as total_earnings    
+FROM artist left join artwork
+ON artist.id = artwork.artist_id
+LEFT JOIN sale
+ON  artwork.id = sale.artwork_id
+Group by artist.id
+ORDER BY total_earnings DESC, artist.name
