@@ -113,3 +113,20 @@ ON c.client_id = p.client_id
 GROUP BY 1
 HAVING count(project_id) >1
 
+Count how many games of a given type turned out to be profitable (their revenue was greater than the production cost). Show the number of games (as number_of_games) and the type column
+SELECT count(*) as number_of_games, type
+FROM games
+WHERE revenue > production_cost
+GROUP BY type
+
+For all companies present in the table, show their name and the sum of gross profit over all years
+SELECT company, sum(revenue - production_cost) as gross_profit_sum
+FROM games
+GROUP BY company
+ORDER BY gross_profit_sum DESC
+
+For each company, select its name, the number of games it produced (as the number_of_games column), the average cost of production (as the avg_cost column). Show only these companies that produced more than one game
+SELECT company, count(*) as number_of_games, avg(production_cost) as avg_cost
+FROM games
+group by company
+having count(*) > 1
