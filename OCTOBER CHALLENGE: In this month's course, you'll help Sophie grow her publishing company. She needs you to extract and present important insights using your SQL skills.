@@ -1,1 +1,70 @@
+Task 1: List all books with prices lower than 10. For each such book, display the title, the genre, and the price. Order the result by price from the lowest to the highest, then alphabetically by title if the price is the same
+SELECT title, genre, price 
+FROM books
+WHERE price < 10
+ORDER BY price asc, title asc
+
+Task 2: Select the titles of the books that have not yet been printed.
+SELECT b.title
+FROM books as b left join printings as p
+ON b.id = p.book_id
+WHERE printing_number is null
+
+Task 3: We wants the details of her company's production for the year 2022. For this, she needs information about all the printings during that year. Let's do this!
+List all books with one or more printings in 2022. Display their IDs and titles. Remove all duplicate rows from the result, keeping only one row of duplicated rows, and order by the book title.
+Task 4: List all books with one or more printings in 2022. Display their IDs and titles. Remove all duplicate rows from the result, keeping only one row of duplicated rows, and order by the book title
+SELECT distinct p.book_id as id, b.title
+FROM books as b left join printings as p
+ON b.id = p.book_id
+WHERE extract(year from p.date_printed) = '2022'
+ORDER BY title
+
+Task 5: To broaden the genres of the books for the company, and we need to get some high-level information. To start, we need the data on the genres the company already covers. Display each genre for which the company has one or more books, with the count of the books in the genre. Sort the result by the count of books from the highest to the lowest. Name the second column book_count.
+SELECT genre, count(id) as book_count
+FROM books
+GROUP BY 1
+having count(id) >=1
+ORDER BY book_count DESC
+
+Task 6: Two of the most important statistics for books are the number of copies printed and the count of the printings. Let's provide them to Sophie.
+For each book, display its title, the count of printings it has had (name the column printings), and the total count of copies printed across all printings (name the column copies_printed). Do not include books that have not yet been printed. Sort the result by copies_printed in descending order.
+SELECT title, COUNT(printings.id) as printings, SUM(copies) as copies_printed
+FROM books LEFT JOIN printings
+  ON books.id = printings.book_id
+WHERE printings.id IS NOT NULL
+GROUP BY books.id, title
+ORDER BY copies_printed DESC;
+
+Task 7: Sophie is interested in publishing more books with higher page counts. She first wants to know what she is already publishing and how high the bar is right now. Let's dig into the data! Find out which book published by the company has the highest page count. Display the title and the page count of the book.
+SELECT title, page_count
+FROM books
+WHERE page_count = (
+  SELECT max(page_count)
+  FROM books)
+  
+Task 8: Now, for her planning needs, Sophie wants to know the revenue potential of each book. Can you help her with this? Obtain the maximum revenue possible across all printings by book. For each book, display the title, the price per copy, the total number of copies printed (name the column copies), and the maximum revenue possible as the product of the price per unit and the total number of copies printed. Name the last column max_revenue
+SELECT b.title, b.price, sum(p.copies) as copies, sum(copies) * price as max_revenue
+FROM books as b join printings as p
+ON b.id = p.book_id
+group by 1, 2
+
+Task 9: Sophie now wants to know about books written by multiple authors.
+Show all books with multiple authors. For each such book, display its title and the number of authors (name the column coauthors). Order the result by the book title.
+SELECT title, COUNT(author_id) as coauthors
+FROM books JOIN books_authors
+  ON books.id = books_authors.book_id
+GROUP BY books.id,title
+HAVING COUNT(author_id) > 1
+ORDER BY title;
+
+Task 10: Sophie wants to know which author has published the most books with her company.
+Show the author who has published the most books with the company. Display his/her full name and the count of the books he/she has published. Name this column books_published.
+SELECT aut.full_name, count(b.book_id) as books_published
+FROM authors as aut join books_authors as b
+ON aut.id = b.author_id
+GROUP BY 1
+HAVING COUNT(b.book_id) >= ALL (
+ 		 SELECT count(book_id) 
+  		 FROM books_authors
+  		GROUP BY author_id)
 
