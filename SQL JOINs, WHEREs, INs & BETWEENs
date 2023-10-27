@@ -367,3 +367,13 @@ JOIN clients cli
   ON cli.id = o.client_id
 GROUP BY 1, 2, 3
 
+Select the first name and last name of the clients who repurchased products (i.e., bought the same product in more than one order), together with the names of those products and the number of the orders they were part of (name that column order_count).
+SELECT c.first_name, p.name, c.last_name, count(p.id) as order_count
+FROM clients as c join orders as o
+ON c.id = o.client_id
+Join order_items as oi
+ON o.id = oi.order_id
+join products as p
+ON oi.product_id = p.id
+Group by 1,2,3
+having count(p.id) > 1
