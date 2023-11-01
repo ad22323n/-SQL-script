@@ -377,3 +377,36 @@ join products as p
 ON oi.product_id = p.id
 Group by 1,2,3
 having count(p.id) > 1
+
+ Show each employee's first name, last name, salary, and the first name and last name of their direct manager in the same row. For employees who don't have a manager (for example the CEO), show NULL as the manager's first and last name.
+Prefix the employee's columns with employee_ and the manager's with manager_, e.g.: employee_first_name
+Select E1.First_name AS employee_first_name,
+E1.Last_name AS employee_last_name,
+E1.Salary AS employee_salary,
+E2.First_name AS manager_first_name,
+E2.Last_name AS manager_last_name
+From Employee AS E1
+Left Join Employee AS E2
+ON E1.Manager_ID = E2.ID
+
+Select the first name, last name, salary and salary grade of employees whose salary fits between the lower_limit and upper_limit from the salgrade table.
+SELECT e.first_name, e.last_name,e.salary,  s.grade
+FROM employee as e join salgrade as s
+ON e.salary between s.lower_limit and s.upper_limit
+
+Show all benefits that the employee with id = 5 would receive. Select the first and last name of that employee, together with the benefits' names.
+SELECT e.first_name, e.last_name, b.benefit_name
+FROM employee e
+JOIN benefits b
+ON e.salary >= b.salary_req
+WHERE e.id = 5
+ORDER BY e.first_name, e.last_name;
+
+For each benefit find the number of employees that receive them. Show two columns: the benefit_name and the count (name that column employee_count). Don't forget about benefits that aren't owned by anyone.
+SELECT
+  benefits.benefit_name,
+  COUNT(employee.id) AS employee_count
+FROM benefits
+LEFT JOIN employee
+  ON salary_req <= employee.salary
+GROUP BY benefits.benefit_name
