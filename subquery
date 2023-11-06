@@ -1,0 +1,26 @@
+Show the names of orchestras that were created after the 'Chamber Orchestra' and have a rating greater than 7.5.
+SELECT orchestras.name
+FROM orchestras
+WHERE year >
+(SELECT year
+FROM orchestras
+WHERE name = 'Chamber Orchestra')
+AND rating >7.5;
+Select the names of all orchestras that have the same city of origin as any city in which any orchestra performed in 2013.
+SELECT name
+FROM orchestras
+WHERE city_origin = any(SELECT city
+     FROM concerts
+     WHERE year = 2013)
+
+Show the name of the orchestras that have the same number of members as the 'Musical Orchestra'. Show the number of members in the second column. Name the second column members_count
+select orc.name, count(mem.id)
+from orchestras orc
+inner join members mem ON
+mem.orchestra_id = orc.id
+group by orc.name
+having count(mem.id) =
+(select count(mem.orchestra_id) 
+ from members mem join orchestras orc 
+ on mem.orchestra_id=orc.id 
+ where orc.name='Musical Orchestra')
