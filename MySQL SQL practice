@@ -36,3 +36,202 @@ FROM employees
 GROUP BY last_name, first_name
 having count(year) > 2
 order by avg(salary) DESC;
+
+
+** ROOM, CLIENT AND EQUIPMENT*** Project 
+Join the student and room tables so that each student is shown together with the room they live in.
+Select the name of the student and room number.
+SELECT s.name, r.room_number
+FROM student as s join  room as r
+ON s.room_id = r.id
+use the full name INNER JOIN to join the room and equipment tables, so that each piece of equipment is shown together with its room and other relevant columns. The result should have the following columns:
+•	room_id – ID of the room.
+•	room_number
+•	beds
+•	floor
+•	equipment_id – ID of the equipment.
+•	name (of the equipment).
+SELECT r.id as ID, r.room_number, r.beds, r.floor, e.id as ID, e.name
+FROM room as r inner join equipment as e
+ON r.id = e.room_id
+
+Show all rows from the student table. If a student is assigned to a room, show the room data as well.
+SELECT *
+FROM student as s left join room as r
+ON s.room_id = r.id
+Select all pieces of equipment together with the room they are assigned to. Show each piece of equipment even if it isn't assigned to a room.
+SELECT *
+FROM equipment as e left join room as r
+ON e.room_id = r.id
+For each student show their data with the data of the room they live in. Show also rooms with no students assigned. Use a RIGHT JOIN
+SELECT *
+FROM student as s right join room as r
+ON s.room_id = r.id
+For each student show the room data the student is assigned to. Show also students who are not assigned to any room. Use a RIGHT JOIN.
+SELECT *
+FROM room as r right join student as s
+ON s.room_id = r.id
+Use INNER JOIN on the room and equipment tables so that all pieces of equipment are shown with their room data. Use table aliases r and e. Select the id and name columns from the equipment table, as well as the room_number and beds columns from the room table.
+SELECT e.id, e.name, r.room_number, r.beds
+FROM equipment as e inner join room as r
+ON e.room_id = r.id
+The challenge is as follows: for each room with 2 beds where there actually are 2 students, we want to show one row which contains the following columns:
+•	the name of the first student.
+•	the name of the second student.
+•	the room number.
+Don't change any column names. Each pair of students should only be shown once. The student whose name comes first in the alphabet should be shown first.
+SELECT distinct s.name, s2.name, r.room_number
+FROM student as s JOIN student as s2
+ON s.room_id=s2.room_id
+JOIN room as r
+ON s2.room_id = r.id 
+WHERE r.beds = 2 and s.name < s2.name
+ORDER BY s.name asc;
+*****----
+Show all books with their movie adaptations. Select each book's title, the name of its publishing house, the title of its adaptation, and the type of the adaptation. Keep the rows with no adaptation in the result.
+SELECT b.title, b.publishing_house, a.title, a.type
+FROM book as b left join adaptation as a
+ON a.book_id = b.id
+where type = 'movie' or type is null
+
+Joined student table with room table to show all the students and the room (room number) they live in
+Then I joined the room table with equipment table to look at rooms with their equipment pieces like, tv, fridge or toaster, even for those room that not have any assigned equipment
+
+**JOIN EXERCICES USING DIFFERENT TABLES**
+For every auctioned item that was sold for a price greater than its initial price, show the item name together with the name of its buyer and the price they paid.
+SELECT a.name, b.name, b.final_price
+FROM auction_item as a join bidder as b
+ON a.id = b.bought_item_id and a.initial_price < b.final_price
+
+Show the name, initial price, and final price of every item with initial price greater than $300.
+If the item wasn't sold (there was no bidding person), show the item's name anyway.
+SELECT a.name, a.initial_price, b.final_price
+FROM auction_item as a left join bidder as b
+ON a.id = b.bought_item_id
+WHERE a.initial_price > 300
+
+**Multiple JOINS
+List all products that have fewer than 150 calories.
+For each product show its name (rename the column to product) and the department in which it can be found (name the column department).
+SELECT p.name as product , d.name as department
+FROM product as p JOIN department as d
+ON d.id = p.department_id 
+JOIN nutrition_data as nd
+ON nd.product_id = p.id
+WHERE nd.calories < 150
+
+For products that weren't sold even once between 2015-02-01 and 2015-02-05, show the product name (rename the column to product_name), it's price and the producer's name (rename the column to company_name). You should display all products that haven't been sold in this interval, also the ones that don't belong to any company.
+SELECT p.name as product_name, p.price, prod.name as company_name
+FROM product as p LEFT JOIN sales_history as sh
+ON sh.product_id = p.id and sh.date between '2015-02-01' and '2015-02-05'
+LEFT JOIN producer as prod 
+ON prod.id = p.producer_id
+WHERE sh.product_id is null
+
+Show the name and price of each product in the 'fruits' and 'vegetables' departments. Consider only those products that are not produced by 'GoodFoods'.
+SELECT p.name, p.price
+FROM product as p left join producer as prod
+ON prod.id = p.producer_id
+join department as d
+ON d.id = p.department_id and d.name in ('fruits', 'vegetables') 
+where (prod.name <> 'GoodFoods' or prod.id is NULL)
+
+---SELF JOIN: S as supervisor and W as worker/apprentice
+Show all workers' names together with the names of their direct supervisors. Rename columns to apprentice_name and master_name, respectively.
+SELECT w.name as apprentice_name, s.name as master_name
+FROM workshop_workers as w join workshop_workers as s
+ON w.master_id = s.id
+
+Show only worker's name, and specialization. Alias column with the name as apprentice. Consider only those workers whose supervisors have more than 14 years of experience.
+SELECT w.name as apprentice, w.specialization
+FROM workshop_workers as w JOIN workshop_workers as s
+ON w.master_id = s.id
+WHERE s.experience > 14
+
+Show the name of the apprentice, their specialization and the ID of the project if the project they are working on is not directly supervised by their master, i.e. the master currently works on another project.
+SELECT w.name , w.specialization , w.project_id
+FROM workshop_workers as w JOIN workshop_workers as s
+ON w.master_id = s.id
+WHERE s.project_id <> w.project_id
+
+Show each dictionary entry (name the column entry) together with the name of its direct hypernym (name the column hypernym) and the name of that hypernym's hypernym (name the column grandhypernym).
+Only include words that have both a direct hypernym and a "grandhypernym".
+SELECT entry.word as entry, hypernym.word as hypernym,super_hypernym.word as grandhypernym
+FROM dictionary as entry JOIN dictionary as hypernym
+ON entry.hypernym_id = hypernym.entry_id
+JOIN dictionary as super_hypernym 
+ON hypernym.hypernym_id = super_hypernym.entry_id
+
+For each entry in the dictionary show the word, its direct hypernym and its hypernym's hypernym. Name the columns entry, hypernym and grandhypernym, respectively. Show all such entries, even those that don't have direct hypernyms or grandhypernyms.
+SELECT entry.word as entry, hypernym.word as hypernym, grandhypernym.word as grandhypernym
+FROM dictionary as entry left join dictionary as hypernym
+ON entry.hypernym_id = hypernym.entry_id
+left join dictionary as grandhypernym 
+ON hypernym.hypernym_id = grandhypernym.entry_id
+
+List all pairs of full siblings. Full siblings are people who have the same mother and the same father. Name the columns with sibling names younger_sibling and older_sibling (use column year_born to identify who is younger).
+You can assume that in our database no two siblings were born in the same year and there are no more than two siblings per family.
+SELECT y.name as younger_sibling, o.name as older_sibling
+FROM person as y inner join person as o
+ON y.mother_id = o.mother_id and y.father_id = o.father_id
+WHERE y.year_born > o.year_born
+
+==> TABLES: PATIENT , PHYSICIAN, THERAPY and TREATMENT 
+We want to know if there are any patients and physicians who have the same email in our clinic. Perhaps physicians also attend our clinic or former patients were hired by the clinic?
+List the first and last name of each patient (name the columns patient_first_name and patient_last_name) and the first and last name of each physician (name the columns physician_first_name and physician_last_name)
+for patients and physicians who share the same email address.
+SELECT p.first_name as patient_first_name, p.last_name as patient_last_name, 
+phy.first_name as physician_first_name, phy.last_name as physician_last_name
+FROM patient as p join physician as phy
+ON p.email = phy.email
+
+We'd like to know if there are patients and physicians at our clinic who share the same first and last name. For each patient and physician matching this condition,
+show the patient's ID (name the column patient_id), the ID of a physician (name the column physician_id), their shared first and last name, and the physician's years of experience. Only list physicians who have more than five years of experience.
+SELECT p.id as patient_id, phy.id as physician_id, phy.first_name, phy.last_name, phy.experience
+FROM patient as p join physician as phy
+on p.first_name = phy.first_name 
+and p.last_name = phy.last_name
+where phy.experience > 5
+
+For each patient, list the treatment that they have been recommended. Select the ID and first and last name of each patient. 
+Additionally, show the type of treatment that the patient has been recommended (name it type) along with a list of the names of available treatment sessions. Only list treatments that are cheaper than $100.
+SELECT p.id, p.first_name, p.last_name, treat.type as type, treat.name
+FROM patient as p join therapy as t
+ON p.id = t.patient_id
+JOIN treatment as treat
+ON t.treatment_type = treat.type
+WHERE treat.price < 100
+
+Show the names and types of treatments (name this column type) that were recommended by a physician named James Ferris. 
+Additionally, show the IDs of patients (as patient_id) for whom these recommendations were made. Exclude treatments of the type relaxation.
+SELECT name, type, patient_id
+FROM therapy JOIN treatment
+  ON treatment.type = treatment_type
+JOIN physician
+  ON physician_id = physician.id
+WHERE type != 'relaxation' AND physician.first_name = 'James' AND physician.last_name = 'Ferris';
+
+TABLES : BUYER AND ITEM 
+Show the name of every buyer together with the name of every item that they can afford.
+SELECT b.name, i.name
+FROM buyer as b left join item as i
+ON i.price <= b.funds
+
+For every buyer that has funds greater than 10 000, show the name of the buyer and the names of the items they can afford that are not of the 'painting' type.
+SELECT b.name, i.name
+FROM buyer as b  join item as i
+ON i.price < b.funds
+WHERE b.funds > 10000 and i.type <> 'painting'
+
+For every couple that wants an apartment, show their name together with the IDs of all apartments within their price range.
+SELECT c.couple_name, a.id
+FROM apartments as a join couples as c
+ON a.price between c.min_price and c.max_price
+
+For each couple that wants an apartment, show their name with matching apartment IDs and locations for all apartments that are within their price range and in their preferred location.
+SELECT c.couple_name, a.id, a.location
+FROM apartments as a join couples as c
+ON a.location = c.pref_location
+WHERE a.price between c.min_price  and c.max_price
+
+
