@@ -211,6 +211,20 @@ JOIN physician
   ON physician_id = physician.id
 WHERE type != 'relaxation' AND physician.first_name = 'James' AND physician.last_name = 'Ferris';
 
+Show the name of each treatment and the first and last names of the patients to whom it was recommended for all therapies recommended by physicians with the surname Core or Calderwood.
+Consider only patients with odd ID numbers.
+To filter patients' IDs by odd numbers
+SELECT name, patient.first_name, patient.last_name
+FROM therapy JOIN physician
+ON physician_id = physician.id
+JOIN patient
+ON patient_id = patient.id
+JOIN treatment
+ON treatment_type = treatment.type
+WHERE physician.last_name IN ('Core', 'Calderwood')
+  AND MOD(patient.id, 2) = 1
+
+
 TABLES : BUYER AND ITEM 
 Show the name of every buyer together with the name of every item that they can afford.
 SELECT b.name, i.name
