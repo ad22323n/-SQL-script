@@ -59,27 +59,32 @@ Show all rows from the student table. If a student is assigned to a room, show t
 SELECT *
 FROM student as s left join room as r
 ON s.room_id = r.id
+
 Select all pieces of equipment together with the room they are assigned to. Show each piece of equipment even if it isn't assigned to a room.
 SELECT *
 FROM equipment as e left join room as r
 ON e.room_id = r.id
+
 For each student show their data with the data of the room they live in. Show also rooms with no students assigned. Use a RIGHT JOIN
 SELECT *
 FROM student as s right join room as r
 ON s.room_id = r.id
+
 For each student show the room data the student is assigned to. Show also students who are not assigned to any room. Use a RIGHT JOIN.
 SELECT *
 FROM room as r right join student as s
 ON s.room_id = r.id
+
 Use INNER JOIN on the room and equipment tables so that all pieces of equipment are shown with their room data. Use table aliases r and e. Select the id and name columns from the equipment table, as well as the room_number and beds columns from the room table.
 SELECT e.id, e.name, r.room_number, r.beds
 FROM equipment as e inner join room as r
 ON e.room_id = r.id
-The challenge is as follows: for each room with 2 beds where there actually are 2 students, we want to show one row which contains the following columns:
+
+For each room with 2 beds where there actually are 2 students, we want to show one row which contains the following columns:
 •	the name of the first student.
 •	the name of the second student.
 •	the room number.
-Don't change any column names. Each pair of students should only be shown once. The student whose name comes first in the alphabet should be shown first.
+Each pair of students should only be shown once. The student whose name comes first in the alphabet should be shown first.
 SELECT distinct s.name, s2.name, r.room_number
 FROM student as s JOIN student as s2
 ON s.room_id=s2.room_id
@@ -87,6 +92,7 @@ JOIN room as r
 ON s2.room_id = r.id 
 WHERE r.beds = 2 and s.name < s2.name
 ORDER BY s.name asc;
+
 *****----
 Show all books with their movie adaptations. Select each book's title, the name of its publishing house, the title of its adaptation, and the type of the adaptation. Keep the rows with no adaptation in the result.
 SELECT b.title, b.publishing_house, a.title, a.type
@@ -231,6 +237,14 @@ SELECT b.name, i.name
 FROM buyer as b left join item as i
 ON i.price <= b.funds
 
+For each buyer with funds less than 8000, show their name together with the names of all paintings and sculptures that are outside of their price range.
+SELECT b.name, i.name
+FROM buyer as b join item as i
+ON i.price > b.funds 
+and b.funds < 8000 
+and i.type in ('sculpture', 'painting')
+
+
 For every buyer that has funds greater than 10 000, show the name of the buyer and the names of the items they can afford that are not of the 'painting' type.
 SELECT b.name, i.name
 FROM buyer as b  join item as i
@@ -248,4 +262,9 @@ FROM apartments as a join couples as c
 ON a.location = c.pref_location
 WHERE a.price between c.min_price  and c.max_price
 
+Show the name of each couple, their preferred apartment location, and the apartment ID for all apartments that are neither in their price range nor in their preferred location.
+SELECT c.couple_name, c.pref_location, a.id
+FROM couples as c join apartments as a
+ON a.location <> c.pref_location
+WHERE price not between min_price and max_price
 
