@@ -268,3 +268,116 @@ FROM couples as c join apartments as a
 ON a.location <> c.pref_location
 WHERE price not between min_price and max_price
 
+
+--EXERCISE: 
+Show the name of each lecturer together with the ID of the group they teach, the language they teach, and the level of the group they teach.
+SELECT l.name, sg.id, l.language,sg.group_level
+FROM lecturer as l join student_group as sg
+ON l.id = sg.lecturer_id
+Show each group ID, number of members, level, language and tuition cost. Consider only groups with more than 10 people and whose lecturer is not 'Maria Garcia'.
+SELECT sg.id, sg.person_no, sg.group_level,l.language, t.cost
+FROM student_group as sg join tuition as t
+ON sg.id = t.group_id
+JOIN lecturer as l
+ON l.id = sg.lecturer_id
+WHERE sg.person_no > 10 and l.name != 'Maria Garcia'
+
+6.17.2024
+Show each student group's ID (use the group_id column), room ID, lecture day, and lecture hour for those groups that do not have both lectures in the same room.
+SELECT t.group_id, t.room_id, t.day, t.hour
+FROM timetable as t join timetable as t2
+ON t.room_id <> t2.room_id
+and t.group_id = t2.group_id
+
+For each group, show its ID (as group_id), language, and level, together with the ID of the room they're in and the days when they have lectures. Consider only those groups whose lectures are always held in the same room.
+SELECT id as group_id, language, group_level, t.room_id, t.day
+FROM student_group join timetable as t
+ON t.group_id = student_group.id
+JOIN timetable as t2
+ON t.group_id = t2.group_id
+WHERE t.room_id = t2.room_id
+AND t.day != t2.day
+
+For all groups taught in the La Lingua school, show the following information:
+•	The ID of a given group.
+•	The name of the lecturer who teaches that group.
+•	The language that the group learns.
+•	The level of the group.
+•	The days and hours when the group has lectures.
+
+However, show this information only for those groups that have both their lectures at the same hour and whose tuition is greater than 800 dollars.
+SELECT sg.id, l.name, l.language, sg.group_level, t.day, t.hour
+FROM lecturer as l join student_group as sg
+ON l.id = sg.lecturer_id
+JOIN timetable as t
+ON sg.id = t.group_id
+JOIN timetable as t2
+ON t2.group_id = t.group_id
+JOIN tuition as tt
+ON tt.group_id = t.group_id
+WHERE t2.hour = t.hour
+AND tt.cost >800 AND t.day != t2.day
+
+Show model, brand, mileage and production year from the car table for these cars that were produced after the 'Roadmaster' (id = 2) and whose original price is greater than original_price of 'Speedster' (id = 1).
+SELECT c.model, c.brand, c.mileage, c.prod_year
+FROM car as c JOIN car as c1
+ON c.prod_year > c1.prod_year
+JOIN car as c2
+ON c.original_price > c2.original_price
+WHERE c1.id = 2 and c2.id = 1
+
+Show the model, brand, and final price of each car sold at the auction. Consider only those sold cars that have more mileage than the car with id = 4.
+SELECT car.model, car.brand, ca.final_price
+FROM car JOIN charity_auction AS ca
+ON car.id = ca.car_id
+JOIN car AS car2
+  ON car.mileage > car2.mileage
+WHERE car2.id = 4
+  AND final_price IS NOT NULL
+
+Show the model and brand of each car whose initial_price was in the price range of the buyer with id = 3, but whose final_price was outside the buyer's price range.
+SELECT c.model, c.brand
+FROM car as c JOIN charity_auction as ca
+ON c.id = ca.car_id
+JOIN buyer as b
+ON b.funds >= ca.initial_price AND ca.final_price > b.funds
+WHERE b.id = 3
+
+Show each buyer's ID (rename the column to buyer_id) together with the model and mileage of the car they bought.
+If a potential buyer didn't buy any car, show their ID anyway.
+SELECT b.id as buyer_id, c.model, c.mileage
+FROM car as c JOIN charity_auction as ca
+ON c.id = ca.car_id
+RIGHT JOIN buyer as b ON b.id = ca.buyer_id
+
+Show the ID and funds of each buyer who didn't buy anything at the auction.
+SELECT b.id, funds
+FROM charity_auction as ca RIGHT JOIN buyer as b
+ON ca.buyer_id = b.id
+WHERE ca.buyer_id is null
+
+EXERCISE:
+Select all data for cats whose breed starts with an 'R', favourite toy starts with the word 'ball', and coloration name ends with an 'm'.
+SELECT *
+FROM cat 
+WHERE breed like "R%" 
+AND fav_toy like "ball%" and coloration LIKE "%m"
+
+Select the names of all male cats that don't have a favorite toy – that is, the value of the field fav_toy is NULL for these cats.
+SELECT name
+FROM cat
+WHERE sex = "M" and fav_toy is null
+Select all data for cats that:
+•	Are older than 10 years.
+•	Are either Ragdoll or Abyssinian.
+•	Have a known favorite toy.
+SELECT *
+FROM cat
+WHERE age > 10 and breed in ("Ragdoll", "Abyssinian") and fav_toy is not null
+Select the id, name, breed and coloration of all cats that:
+•	Are females.
+•	Like teaser toys.
+•	Are not of the Persian or Siamese breeds.
+SELECT id, name, breed, coloration
+FROM cat
+WHERE sex = "F" and fav_toy = "teaser" and breed not in ("Persian", "Siamese")
